@@ -1,34 +1,48 @@
 (function() {
 	'use strict';
-	var myapp = angular.module('lunchOrdering', ['ngMaterial']).controller('RestaurantSelector', RestaurantSelector);
-	
-    /**
-     * Enable locationProvider html5Mode so that we can use $location 
-     */
+	var myapp = angular
+					.module('lunchOrdering', ['ngMaterial', 'ngResource'])
+					.controller('RestaurantSelector', RestaurantSelector);
+
+	/**
+	 * Enable locationProvider html5Mode so that we can use $location
+	 */
 	myapp.config(function($locationProvider) {
 		$locationProvider.html5Mode({
 			enabled : true,
 			requireBase : false
 		});
 	});
-	
-    /**
-     * A function to capitalize the first letters of words. 
-     */
+
+	/**
+	 * A function to capitalize the first letters of words.
+	 */
 	myapp.filter('capitalize', function() {
 		return function(input) {
 			return (!!input) ? input.charAt(0).toUpperCase() + input.substr(1).toLowerCase() : '';
 		}
 	});
 
-    /**
-     * The lunchOrdering controller function 
-     */
-	function RestaurantSelector($timeout, $q, $log, $http, $location, $mdDialog) {
+	/**
+	 *  A function to update the orders record through a Rest service.
+	 */
+	myapp.factory('Orders', ['$resource',
+	function($resource) {
+		return $resource('/orders/:id', null, {
+			'update' : {
+				method : 'PUT'
+			}
+		});
+	}]);
+
+	/**
+	 * The lunchOrdering controller function
+	 */
+	function RestaurantSelector($timeout, $q, $log, $http, $location, $mdDialog, Orders) {
 		var self = this;
 		self.simulateQuery = false;
 		self.isDisabled = false;
-		
+
 		/**
 		 * Obtain the available restaurants and their menus
 		 */
@@ -44,8 +58,6 @@
 		$http.get("json/orders.json").then(function(response) {
 			self.activeOrders = response.data.orders;
 		});
-		
-		
 
 		self.user = "guest";
 		var searchObj = $location.search();
@@ -65,10 +77,10 @@
 		self.totalPrice = 0;
 		self.userPlacedOrder = hasPlacedOrder;
 
-        /**
-         * A function to calculate the total price of
-         *  selected items. 
-         */
+		/**
+		 * A function to calculate the total price of
+		 *  selected items.
+		 */
 		function menuItemChange(menuItem) {
 			if (menuItem.wanted) {
 				self.totalPrice += menuItem.price;
@@ -76,35 +88,33 @@
 				self.totalPrice -= menuItem.price;
 			}
 		}
-		
+
 		/**
 		 * A function to check if an object contains a specified user
 		 */
-		function hasPlacedOrder(user){
+		function hasPlacedOrder(user) {
 			var activeOrds = self.activeOrders;
-			for(var i = 0; i < activeOrds.length; i++){
-				if(activeOrds[i].user.toLowerCase() == user.toLowerCase()){
+			for (var i = 0; i < activeOrds.length; i++) {
+				if (activeOrds[i].user.toLowerCase() == user.toLowerCase()) {
 					return true;
 				}
 			}
 			return false;
 		}
-		
-        /**
-         * A function to place an order in the system 
-         * - submit order info to rest service or persistence layer 
-         */
+
+		/**
+		 * A function to place an order in the system
+		 * - submit order info to rest service or persistence layer
+		 */
 		function placeOrder(event) {
-			if(hasPlacedOrder(self.user)){
+			if (hasPlacedOrder(self.user)) {
 				//submit order to the system
 				$mdDialog.show($mdDialog.alert()
-				    .title('Order Exists')
-				    .textContent('Seems you had placed an order before. Want to change it?')
-				    .ariaLabel('Order Exists')
-				    .ok('Yes')
-				    .targetEvent(event));
-			}
-			else if (self.activeMenu.length > 0) {
+					.title('Order Exists')
+					.textContent('Seems you had placed an order before. Want to change it?')
+					.ariaLabel('Order Exists')
+					.ok('Yes').targetEvent(event));
+			} else if (self.activeMenu.length > 0) {
 				//get selected items in menu
 				var user = self.user;
 				var restaurant = self.activeRestaurant;
@@ -116,58 +126,57 @@
 					}
 				}
 				//submit order to the system
+				//updateOrder(self.user);
 				$mdDialog.show($mdDialog.alert()
-				    .title('Order Confirmation')
-				    .textContent('Your order has been placed.')
-				    .ariaLabel('Order confirmation')
-				    .ok('Cool')
-				    .targetEvent(event));
+					.title('Order Confirmation')
+					.textContent('Your order has been placed.')
+					.ariaLabel('Order confirmation')
+					.ok('Cool')
+					.targetEvent(event));
 
-			}
-			else {
+			} else {
 				$mdDialog.show($mdDialog.alert()
-				    .title('Place your order')
-				    .textContent('You have to place your order first')
-				    .ariaLabel('Place your order')
-				    .ok('oops!')
-				    .targetEvent(event));
+					.title('Place your order')
+					.textContent('You have to place your order first')
+					.ariaLabel('Place your order')
+					.ok('oops!')
+					.targetEvent(event));
 			}
 		}
-		
-		
+
 		/**
-		 * A function to modify the selected active order 
+		 * A function to modify the selected active order
 		 */
-		function modifyOrder(order, event){
-			if(self.user.toLowerCase() == order.user.toLowerCase()){
+		function modifyOrder(order, event) {
+			if (self.user.toLowerCase() == order.user.toLowerCase()) {
 				$mdDialog.show($mdDialog.alert()
-				    .title('Change your order?')
-				    .textContent('Proceed to change or add items to your order. This will clear your current order.')
-				    .ariaLabel('Change order')
-				    .ok('Okay')
-				    .targetEvent(event));
-			}else {
+					.title('Change your order?')
+					.textContent('Proceed to change or add items to your order. This will clear your current order.')
+					.ariaLabel('Change order')
+					.ok('Okay')
+					.targetEvent(event));
+			} else {
 				$mdDialog.show($mdDialog.alert()
-				    .title('Is this your order?')
-				    .textContent('This is not your order :)')
-				    .ariaLabel('Not your order')
-				    .ok('Okay')
-				    .targetEvent(event));
+					.title('Is this your order?')
+					.textContent('This is not your order :)')
+					.ariaLabel('Not your order')
+					.ok('Okay')
+					.targetEvent(event));
 			}
 		}
 
-        /**
-         * A function to log the changes in text
-         *  being typed in the autocomplete field. 
-         */
+		/**
+		 * A function to log the changes in text
+		 *  being typed in the autocomplete field.
+		 */
 		function searchTextChange(text) {
 			$log.info('Text changed to ' + text);
 		}
 
-        /**
-         * A function to detect changes in the restaurant
-         *  selected and update the selected items.
-         */
+		/**
+		 * A function to detect changes in the restaurant
+		 *  selected and update the selected items.
+		 */
 		function selectedItemChange(item) {
 			if ( typeof item !== 'undefined') {
 				self.totalPrice = 0;
@@ -195,7 +204,7 @@
 				};
 			});
 		}
-		
+
 		/**
 		 * A function to Search for restaurants
 		 *  $timeout used to simulate remote dataservice call.
@@ -222,6 +231,20 @@
 			return function filterFn(restaurant) {
 				return (restaurant.value.indexOf(lowercaseQuery) === 0);
 			};
+		}
+
+		/**
+		 * A function to update place order in the backend
+		 */
+		function updateOrder(user) {
+			//Use the user name and current date to generate a unique order_id
+			//Assumption: user gets only one order per day, any order by same user
+			// on same day overwrites previous order.
+			var d = new Date();
+            var order_id = user + d.getDate() + d.getMonth() + d.getYear();
+			Orders.update({
+				id : order_id
+			}, order);
 		}
 
 	}
