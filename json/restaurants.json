@@ -1,0 +1,60 @@
+{
+	"restaurants": [
+		{
+			"Cafe Deli": [
+				{
+					"item": "chicken stew",
+					"price": 450,
+					"available": "yes",
+					"wanted": false
+				}, {
+					"item": "samosa",
+					"price": 150,
+					"available": "yes",
+					"wanted": false
+				}, {
+					"item": "pie",
+					"price": 350,
+					"available": "yes",
+					"wanted": false
+				}
+			],
+			"Swahili Dishes": [
+				{
+					"item": "pilau",
+					"price": 160,
+					"available": "yes",
+					"wanted": false
+				}, {
+					"item": "viazi",
+					"price": 180,
+					"available": "yes",
+					"wanted": false
+				}, {
+					"item": "wali",
+					"price": 170,
+					"available": "yes",
+					"wanted": false
+				}
+			],
+			"Subway": [
+				{
+					"item": "turkey",
+					"price": 300,
+					"available": "yes",
+					"wanted": false
+				}, {
+					"item": "meatball",
+					"price": 380,
+					"available": "yes",
+					"wanted": false
+				}, {
+					"item": "teriyaki",
+					"price": 330,
+					"available": "yes",
+					"wanted": false
+				}
+			]
+		}
+	]
+}

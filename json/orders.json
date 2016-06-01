@@ -1,0 +1,26 @@
+{
+	"orders": [
+		{
+			"user": "Sam",
+			"status": "finalized",
+			"order": {
+				"restaurant": "Cafe Deli",
+				"food": "rice, roast chicken"
+			}
+		}, {
+			"user": "Joe",
+			"status": "ordered",
+			"order": {
+				"restaurant": "Swahili Dishes",
+				"food": "pilau"
+			}
+		}, {
+			"user": "Tom",
+			"status": "delivered",
+			"order": {
+				"restaurant": "Subway",
+				"food": "marinara"
+			}
+		}
+	]
+}
